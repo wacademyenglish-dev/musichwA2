@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>WOLF LABS | Homework: Favorite Music A2</title>
+    <!-- Premium Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800;900&family=Outfit:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* --- WOLF LABS MOBILE ENGINE (NEON MUSIC EDITION) --- */
+        :root {
+            --bg-base: #09090b; 
+            --brand-main: #ec4899; /* Neon Pink */
+            --accent: #06b6d4; /* Cyan */
+            --correct: #10b981; 
+            --incorrect: #f43f5e; 
+            --text-main: #f8fafc;
+            --text-dim: #cbd5e1;
+            --glass-bg: rgba(15, 23, 42, 0.9); 
+            --glass-border: rgba(255, 255, 255, 0.1); 
+            --font-display: 'Montserrat', sans-serif;
+            --font-body: 'Outfit', sans-serif;
+            --font-code: 'Fira Code', monospace;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        button, input { font-family: var(--font-body); outline: none; }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            font-family: var(--font-body);
+            overflow: hidden;
+            height: 100vh; width: 100vw;
+            display: flex; flex-direction: column;
+            position: fixed; 
+        }
+
+        /* BACKGROUND */
+        .bg-image { position: absolute; inset: 0; background-image: url('https://images.unsplash.com/photo-1470229722913-7c090be5f524?q=80&w=1000&auto=format&fit=crop'); background-size: cover; background-position: center; opacity: 0.1; filter: grayscale(50%) brightness(0.6); z-index: 1;}
+        .bg-overlay { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(9,9,11,0.8) 0%, rgba(9,9,11,1) 100%); z-index: 2;}
+
+        /* TOP BAR */
+        .top-bar { position: relative; z-index: 100; display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: rgba(15, 23, 42, 0.95); border-bottom: 1px solid var(--glass-border); }
+        .logo { font-family: var(--font-display); font-size: 1.1rem; color: #fff; display: flex; align-items: center; gap: 8px;}
+        .logo i { color: var(--brand-main); }
+        .score-badge { background: rgba(236, 72, 153, 0.1); border: 1px solid var(--brand-main); padding: 5px 12px; border-radius: 8px; font-weight: 800; font-size: 0.9rem; color: #fff; display: flex; align-items: center; gap: 5px;}
+        .score-badge i { color: var(--brand-main); }
+        
+        .progress-container { width: 100%; height: 6px; background: #1e293b; position: relative; z-index: 100; }
+        .progress-bar { height: 100%; width: 0%; background: var(--brand-main); transition: 0.4s ease; box-shadow: 0 0 10px var(--brand-main); }
+
+        /* MAIN AREA */
+        .main-container { flex: 1; position: relative; z-index: 10; display: flex; align-items: center; justify-content: center; padding: 20px; overflow-y: auto; overflow-x: hidden;}
+        
+        .slide { width: 100%; max-width: 500px; display: none; flex-direction: column; align-items: center; opacity: 0; transform: translateX(20px); transition: 0.4s ease; }
+        .slide.active { display: flex; opacity: 1; transform: translateX(0); }
+
+        .glass-card {
+            background: var(--glass-bg); border: 1px solid var(--glass-border); border-top: 3px solid var(--brand-main);
+            padding: 30px 25px; border-radius: 24px; width: 100%; box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+            display: flex; flex-direction: column; align-items: center; text-align: center;
+        }
+
+        /* TYPOGRAPHY */
+        h1 { font-family: var(--font-display); font-size: 2.2rem; color: #fff; line-height: 1.1; margin-bottom: 15px; text-transform: uppercase; }
+        h2 { font-family: var(--font-display); font-size: 1.4rem; color: var(--brand-main); margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px;}
+        p { font-size: 1.1rem; color: var(--text-dim); line-height: 1.5; margin-bottom: 25px; width: 100%;}
+
+        /* INPUTS & BUTTONS */
+        .input-name { width: 100%; padding: 18px; border-radius: 12px; border: 2px solid var(--glass-border); background: rgba(0,0,0,0.5); color: #fff; font-size: 1.2rem; text-align: center; margin-bottom: 25px; transition: 0.3s;}
+        .input-name:focus { border-color: var(--brand-main); box-shadow: 0 0 15px var(--accent-glow);}
+        
+        .btn-main { width: 100%; padding: 18px; border: none; border-radius: 14px; font-weight: 800; font-size: 1.2rem; text-transform: uppercase; cursor: pointer; transition: 0.2s; background: var(--brand-main); color: #fff; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 8px 20px rgba(236, 72, 153, 0.3);}
+        .btn-main:active { transform: scale(0.96); }
+
+        .mcq-btn { width: 100%; padding: 18px 20px; background: #1e293b; border: 2px solid var(--glass-border); border-radius: 14px; color: #fff; font-size: 1.1rem; font-weight: 600; text-align: left; cursor: pointer; transition: 0.2s; margin-bottom: 15px; display: flex; align-items: center; gap: 15px;}
+        .mcq-btn i { font-size: 1.4rem; color: var(--brand-main); width: 30px; text-align: center;}
+        .mcq-btn.correct { background: var(--correct); border-color: var(--correct); color: #000;}
+        .mcq-btn.correct i { color: #000; }
+        .mcq-btn.incorrect { background: var(--incorrect); border-color: var(--incorrect); color: #fff; animation: shake 0.4s;}
+        
+        /* SYNTAX BUILDER */
+        .drop-zone { min-height: 80px; border: 2px dashed rgba(255,255,255,0.3); border-radius: 15px; padding: 15px; width: 100%; margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center; background: rgba(0,0,0,0.3);}
+        .drop-zone.success { border-color: var(--correct); background: rgba(16, 185, 129, 0.1); }
+        .word-bank { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; width: 100%; }
+        .word-chip { padding: 12px 20px; background: #1e293b; border: 1px solid var(--glass-border); border-radius: 10px; color: #fff; font-weight: 700; font-size: 1.1rem; cursor: pointer; transition: 0.2s;}
+        .word-chip.used { opacity: 0; pointer-events: none; }
+
+        /* PHONE UI */
+        .phone-ui { width: 100%; border: 8px solid #1e293b; border-radius: 30px; background: #000; overflow: hidden; margin-bottom: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.5);}
+        .phone-header { background: #0f172a; padding: 15px; font-weight: 800; font-size: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 10px;}
+        .phone-chat { padding: 20px; display: flex; flex-direction: column; gap: 15px; min-height: 180px; }
+        .msg { padding: 12px 18px; border-radius: 15px; max-width: 85%; font-size: 1rem; font-weight: 500;}
+        .msg.received { background: #334155; color: #fff; align-self: flex-start; border-bottom-left-radius: 2px;}
+        .msg.sent { background: var(--brand-main); color: #fff; align-self: flex-end; border-bottom-right-radius: 2px; display: none; animation: popIn 0.3s;}
+
+        /* FEEDBACK OVERLAY */
+        .feedback-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 999; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: 0.3s; backdrop-filter: blur(5px);}
+        .feedback-overlay.show { opacity: 1; pointer-events: auto; }
+        .feedback-card { background: #0f172a; border-radius: 24px; padding: 40px; text-align: center; width: 90%; max-width: 350px; transform: scale(0.8); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 2px solid var(--correct); box-shadow: 0 20px 50px rgba(0,0,0,0.8);}
+        .feedback-overlay.show .feedback-card { transform: scale(1); }
+
+        @keyframes popIn { from { opacity: 0; transform: scale(0.9) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-5px);} 75% {transform: translateX(5px);} }
+    </style>
+</head>
+<body>
+
+    <div class="bg-image"></div>
+    <div class="bg-overlay"></div>
+
+    <div class="top-bar">
+        <div class="logo"><i class="fa-solid fa-music"></i> MUSIC RECALL</div>
+        <div class="score-badge" id="score-display"><i class="fa-solid fa-star"></i> 0</div>
+    </div>
+    <div class="progress-container"><div class="progress-bar" id="p-bar"></div></div>
+
+    <main class="main-container">
+
+        <!-- 1. COVER -->
+        <div class="slide active" id="slide-0">
+            <div class="glass-card">
+                <i class="fa-solid fa-compact-disc" style="font-size: 4.5rem; color: var(--brand-main); margin-bottom: 20px; filter: drop-shadow(0 0 20px var(--accent-glow));"></i>
+                <h1>BEAT<br>RECALL</h1>
+                <p>Welcome to your A2 homework! Complete 15 music missions to earn stars.</p>
+                <input type="text" id="student-name" class="input-name" placeholder="Enter Your Name" autocomplete="off">
+                <button class="btn-main" onclick="startHomework()">START MISSION <i class="fa-solid fa-play"></i></button>
+            </div>
+        </div>
+
+        <!-- 2. EX 1: VOCAB -->
+        <div class="slide" id="slide-1">
+            <div class="glass-card">
+                <h2><i class="fa-solid fa-bolt"></i> EXERCISE 1</h2>
+                <p>What does it mean when music "pumps you up"?</p>
+                <div style="width: 100%;">
+                    <button class="mcq-btn" onclick="checkMCQ(this, false)"><i class="fa-solid fa-moon"></i> It makes you sleep.</button>
+                    <button class="mcq-btn" onclick="checkMCQ(this, true)"><i class="fa-solid fa-fire"></i> It makes you feel excited.</button>
+                    <button class="mcq-btn" onclick="checkMCQ(this, false)"><i class="fa-solid fa-sad-tear"></i> It makes you feel sad.</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. EX 2: GRAMMAR -->
+        <div class="slide" id="slide-2">
+            <div class="glass-card">
+                <h2><i class="fa-solid fa-code"></i> EXERCISE 2</h2>
+                <p>Choose the correct word to give a reason.</p>
+                <div style="background: rgba(0,0,0,0.5); padding: 20px; border-radius: 15px; border: 1px dashed var(--glass-border); width: 100%; margin-bottom: 20px;">
+                    <span style="font-size: 1.4rem; color: #fff; font-weight: 700;">"I love rock music _____ it has a lot of energy."</span>
+                </div>
+                <div style="width: 100%; display: flex; gap: 10px;">
+                    <button class="btn-main" style="background: #1e293b; color: #fff; border: 2px solid var(--glass-border); flex: 1;" onclick="checkMCQ(this, true, true)">because</button>
+                    <button class="btn-main" style="background: #1e293b; color: #fff; border: 2px solid var(--glass-border); flex: 1;" onclick="checkMCQ(this, false, true)">but</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. EX 3: STORY -->
+        <div class="slide" id="slide-3">
+            <div class="glass-card">
+                <h2><i class="fa-solid fa-weight-scale"></i> EXERCISE 3</h2>
+                <p>Why did the man in the video listen to Swedish House Mafia 1,800 times?</p>
+                <div style="width: 100%;">
+                    <button class="mcq-btn" onclick="checkMCQ(this, false)"><i class="fa-solid fa-car"></i> To learn how to drive.</button>
+                    <button class="mcq-btn" onclick="checkMCQ(this, true)"><i class="fa-solid fa-person-running"></i> To get motivated to lose weight.</button>
+                    <button class="mcq-btn" onclick="checkMCQ(this, false)"><i class="fa-solid fa-guitar"></i> To learn how to play guitar.</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. EX 4: SYNTAX -->
+        <div class="slide" id="slide-4">
+            <div class="glass-card">
+                <h2><i class="fa-solid fa-hammer"></i> EXERCISE 4</h2>
+                <p>Build the opinion sentence.</p>
+                <div class="drop-zone" id="dz-1"></div>
+                <div class="word-bank" id="wb-1">
+                    <div class="word-chip" onclick="moveChip(this, 'dz-1', 'wb-1', 'I,like,this,band,because,they,are,cute.')">are</div>
+                    <div class="word-chip" onclick="moveChip(this, 'dz-1', 'wb-1', 'I,like,this,band,because,they,are,cute.')">like</div>
+                    <div class="word-chip" onclick="moveChip(this, 'dz-1', 'wb-1', 'I,like,this,band,because,they,are,cute.')">cute.</div>
+                    <div class="word-chip" onclick="moveChip(this, 'dz-1', 'wb-1', 'I,like,this,band,because,they,are,cute.')">because</div>
+                    <div class="word-chip" onclick="moveChip(this, 'dz-1', 'wb-1', 'I,like,this,band,because,they,are,cute.')">band</div>
+                    <div class="word-chip" onclick="moveChip(this, 'dz-1', 'wb-1', 'I,like,this,band,because,they,are,cute.')">I</div>
+                    <div class="word-chip" onclick="moveChip(this, 'dz-1', 'wb-1', 'I,like,this,band,because,they,are,cute.')">they</div>
+                    <div class="word-chip" onclick="moveChip(this, 'dz-1', 'wb-1', 'I,like,this,band,because,they,are,cute.')">this</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. EX 5: VOCAB -->
+        <div class="slide" id="slide-5">
+            <div class="glass-card">
+                <h2><i class="fa-solid fa-microphone"></i> EXERCISE 5</h2>
+                <p>What is a "Solo Artist"?</p>
+                <div style="width: 100%;">
+                    <button class="mcq-btn" onclick="checkMCQ(this, false)">A group of 5 people.</button>
+                    <button class="mcq-btn" onclick="checkMCQ(this, true)">A musician who performs alone.</button>
+                    <button class="mcq-btn" onclick="checkMCQ(this, false)">A person who only plays guitar.</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 7. EX 6: GRAMMAR -->
+        <div class="slide" id="slide-6">
+            <div class="glass-card">
+                <h2><i class="fa-solid fa-code"></i> EXERCISE 6</h2>
+                <p>Complete the sentence using the informal version of "Because".</p>
+                <div style="background: rgba(0,0,0,0.5); padding: 20px; border-radius: 15px; border: 1px dashed var(--glass-border); width: 100%; margin-bottom: 20px;">
+                    <span style="font-size: 1.4rem; color: #fff; font-weight: 700;">"I like The Beatles _____ they are cute."</span>
+                </div>
+                <div style="width: 100%;">
+                    <button class="mcq-btn" onclick="checkMCQ(this, true)">cuz</button>
+                    <button class="mcq-btn" onclick="checkMCQ(this, false)">cosy</button>
+                    <button class="mcq-btn" onclick="checkMCQ(this, false)">case</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 8. EX 7: VOCAB -->
+        <div class="slide" id="slide-7">
+            <div class="glass-card">
+                <h2><i class="fa-solid fa-music"></i> EXERCISE 7</h2>
+                <p>What kind of music is "Acoustic"?</p>
+                <div style="width: 100%;">
+                    <button class="mcq-btn" onclick="checkMCQ(this, false)">Electronic music.</button>
+                    <button class="mcq-btn" onclick="checkMCQ(this, true)">Music without electronic instruments.</button>
+                    <button class="mcq-btn" onclick="checkMCQ(this, false)">Loud rap music.</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 9. EX 8: STORY -->
+        <div class="slide" id="slide-8">
+            <div class="glass-card">
+                <h2><i class="fa-solid fa-brain"></i> EXERCISE 8</h2>
+                <p>Fill in the blank: "His music takes you to a whole _____ world."</p>
+                <div style="width: 100%;">
+                    <button class="mcq-btn" onclick="checkMCQ(this, false)">boring</button>
+                    <button class="mcq-btn" onclick="checkMCQ(this, true)">another</button>
+                    <button class="mcq-btn" onclick="checkMCQ(this, false)">small</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 10. EX 9: VOCAB -->
+        <div class="slide" id="slide-9">
+            <div class="glass-card">
+                <h2><i class="fa-solid fa-star"></i> EXERCISE 9</h2>
+                <p>Pink Floyd has an _____ sound.</p>
+                <div style="width: 100%;">
+                    <button class="mcq-btn" onclick="checkMCQ(this, true)">extraordinary</button>
+                    <button class="mcq-btn" onclick="checkMCQ(this, false)">ordinary</button>
+                    <button class="mcq-btn" onclick="checkMCQ(this, false)">bad</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 11. EX 10: SYNTAX -->
+        <div class="slide" id="slide-10">
+            <div class="glass-card">
+                <h2><i class="fa-solid fa-hammer"></i> EXERCISE 10</h2>
+                <p>Reorder: "Music helps me get crazy motivated."</p>
+                <div class="drop-zone" id="dz-2"></div>
+                <div class="word-bank" id="wb-2">
+                    <div class="word-chip" onclick="moveChip(this, 'dz-2', 'wb-2', 'Music,helps,me,get,crazy,motivated.')">crazy</div>
+                    <div class="word-chip" onclick="moveChip(this, 'dz-2', 'wb-2', 'Music,helps,me,get,crazy,motivated.')">motivated.</div>
+                    <div class="word-chip" onclick="moveChip(this, 'dz-2', 'wb-2', 'Music,helps,me,get,crazy,motivated.')">me</div>
+                    <div class="word-chip" onclick="moveChip(this, 'dz-2', 'wb-2', 'Music,helps,me,get,crazy,motivated.')">Music</div>
+                    <div class="word-chip" onclick="moveChip(this, 'dz-2', 'wb-2', 'Music,helps,me,get,crazy,motivated.')">get</div>
+                    <div class="word-chip" onclick="moveChip(this, 'dz-2', 'wb-2', 'Music,helps,me,get,crazy,motivated.')">helps</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 12. EX 11: VOCAB -->
+        <div class="slide" id="slide-11">
+            <div class="glass-card">
+                <h2><i class="fa-solid fa-briefcase"></i> EXERCISE 11</h2>
+                <p>A "Professional" introduction is used at...</p>
+                <div style="width: 100%;">
+                    <button class="mcq-btn" onclick="checkMCQ(this, true)">work or school.</button>
+                    <button class="mcq-btn" onclick="checkMCQ(this, false)">a party with friends.</button>
+                    <button class="mcq-btn" onclick="checkMCQ(this, false)">the beach.</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 13. EX 12: STORY -->
+        <div class="slide" id="slide-12">
+            <div class="glass-card">
+                <h2><i class="fa-solid fa-list-ol"></i> EXERCISE 12</h2>
+                <p>How much weight did the man lose?</p>
+                <div style="width: 100%;">
+                    <button class="mcq-btn" onclick="checkMCQ(this, false)">10 lbs</button>
+                    <button class="mcq-btn" onclick="checkMCQ(this, true)">110 lbs</button>
+                    <button class="mcq-btn" onclick="checkMCQ(this, false)">500 lbs</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 14. EX 13: VOCAB -->
+        <div class="slide" id="slide-13">
+            <div class="glass-card">
+                <h2><i class="fa-solid fa-comments"></i> EXERCISE 13</h2>
+                <p>What should you try to avoid making when speaking?</p>
+                <div style="width: 100%;">
+                    <button class="mcq-btn" onclick="checkMCQ(this, false)">friends</button>
+                    <button class="mcq-btn" onclick="checkMCQ(this, true)">mistakes</button>
+                    <button class="mcq-btn" onclick="checkMCQ(this, false)">money</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 15. EX 14: GRAMMAR -->
+        <div class="slide" id="slide-14">
+            <div class="glass-card">
+                <h2><i class="fa-solid fa-code"></i> EXERCISE 14</h2>
+                <p>Choose the correct reason for liking Eminem.</p>
+                <div style="background: rgba(0,0,0,0.5); padding: 20px; border-radius: 15px; border: 1px dashed var(--glass-border); width: 100%; margin-bottom: 20px;">
+                    <span style="font-size: 1.4rem; color: #fff; font-weight: 700;">"I like Eminem _____ he has a good style."</span>
+                </div>
+                <div style="width: 100%;">
+                    <button class="mcq-btn" onclick="checkMCQ(this, true)">because</button>
+                    <button class="mcq-btn" onclick="checkMCQ(this, false)">so</button>
+                    <button class="mcq-btn" onclick="checkMCQ(this, false)">then</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 16. EX 15: TEXTING -->
+        <div class="slide" id="slide-15">
+            <div class="glass-card">
+                <h2><i class="fa-brands fa-whatsapp"></i> EXERCISE 15</h2>
+                <p>Recommend a song and give a reason.</p>
+                <div class="phone-ui">
+                    <div class="phone-header"><i class="fa-solid fa-user-circle" style="color:var(--brand-main); font-size:1.5rem;"></i> Best Friend</div>
+                    <div class="phone-chat" id="chat-box">
+                        <div class="msg received">I need a new song to listen to. Any ideas?</div>
+                        <div class="msg sent" id="sent-msg"></div>
+                    </div>
+                </div>
+                <div style="width: 100%; display: flex; flex-direction: column; gap: 10px;" id="phone-opts">
+                    <button class="mcq-btn" style="margin:0;" onclick="sendText(this, 'Listen to Pink Floyd because their sound is extraordinary.', true)">Listen to Pink Floyd because their sound is extraordinary.</button>
+                    <button class="mcq-btn" style="margin:0;" onclick="sendText(this, 'Listen rock music because they is cute.', false)">Listen rock music because they is cute.</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 17. FINISH -->
+        <div class="slide" id="slide-16">
+            <div class="glass-card" style="border-top-color: var(--correct);">
+                <i class="fa-solid fa-award" style="font-size: 5rem; color: var(--correct); margin-bottom: 20px; filter: drop-shadow(0 0 20px var(--correct));"></i>
+                <h1 style="color: var(--correct);">MISSION<br>CLEARED</h1>
+                <p style="font-size: 1.2rem; color: #fff; font-weight: 700; margin-bottom: 5px;"><span class="dyn-name">Student</span>, you are a rockstar!</p>
+                <p>You mastered 15 music missions.</p>
+                
+                <div style="background: rgba(0,0,0,0.5); border: 1px solid var(--glass-border); padding: 20px; border-radius: 15px; width: 100%; margin-bottom: 30px;">
+                    <span style="font-family: var(--font-code); color: var(--text-dim); display: block; margin-bottom: 10px;">FINAL SCORE</span>
+                    <span style="font-size: 3rem; color: var(--brand-main); font-weight: 900;" id="final-score">⭐ 15/15</span>
+                </div>
+
+                <button class="btn-main" style="background: var(--correct); color: #fff; box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);" onclick="alert('Mission data saved! Well done.')"><i class="fa-solid fa-paper-plane"></i> SUBMIT HOMEWORK</button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- FEEDBACK POPUP -->
+    <div class="feedback-overlay" id="feedback">
+        <div class="feedback-card">
+            <i class="fa-solid fa-star" style="font-size: 4rem; color: var(--brand-main); margin-bottom: 15px; filter: drop-shadow(0 0 20px var(--brand-main));"></i>
+            <h2 style="color: var(--correct); font-size: 1.8rem; margin-bottom: 10px;">FANTASTIC!</h2>
+            <p style="color: #fff; margin:0;" id="fb-msg">+1 Star earned</p>
+        </div>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const totalSlides = 17; // Updated for 15 exercises + cover + finish
+        let score = 0;
+        let studentName = "Student";
+
+        function updateProgress() {
+            const pct = (currentSlide / (totalSlides - 1)) * 100;
+            document.getElementById('p-bar').style.width = pct + '%';
+        }
+
+        function showSlide(index) {
+            document.querySelectorAll('.slide').forEach((el, i) => {
+                if (i === index) {
+                    el.classList.add('active');
+                } else {
+                    el.classList.remove('active');
+                }
+            });
+            updateProgress();
+        }
+
+        function nextSlideDelay() {
+            setTimeout(() => {
+                currentSlide++;
+                showSlide(currentSlide);
+            }, 1500);
+        }
+
+        function showFeedback() {
+            const fb = document.getElementById('feedback');
+            fb.classList.add('show');
+            setTimeout(() => {
+                fb.classList.remove('show');
+            }, 1300);
+        }
+
+        window.startHomework = () => {
+            const input = document.getElementById('student-name');
+            if (input && input.value.trim() !== "") studentName = input.value.trim();
+            document.querySelectorAll('.dyn-name').forEach(el => el.innerText = studentName);
+            currentSlide++;
+            showSlide(currentSlide);
+        }
+
+        window.checkMCQ = (btn, isCorrect, isGrammar = false) => {
+            const parent = btn.parentElement;
+            if(parent.classList.contains('locked')) return;
+
+            if (isCorrect) {
+                btn.classList.add('correct');
+                if(isGrammar) {
+                    btn.style.background = 'var(--correct)';
+                    btn.style.borderColor = 'var(--correct)';
+                    btn.style.color = '#000';
+                }
+                parent.classList.add('locked');
+                score++;
+                document.getElementById('score-display').innerHTML = `<i class="fa-solid fa-star"></i> ${score}`;
+                showFeedback();
+                nextSlideDelay();
+            } else {
+                btn.classList.add('incorrect');
+                setTimeout(() => { btn.classList.remove('incorrect'); }, 500);
+            }
+        }
+
+        // Sentence Builder
+        let buildState = {};
+        window.moveChip = (chip, dzId, wbId, targetStr) => {
+            if(chip.classList.contains('used')) return;
+            
+            const targetArr = targetStr.split(',');
+            const dz = document.getElementById(dzId);
+            
+            if(!buildState[dzId]) buildState[dzId] = [];
+
+            const newChip = document.createElement('div');
+            newChip.className = 'word-chip';
+            newChip.style.background = 'var(--brand-main)';
+            newChip.style.color = '#fff';
+            newChip.style.borderColor = 'var(--brand-main)';
+            newChip.innerText = chip.innerText;
+            
+            const uniqueId = 'chip_' + Math.random().toString(36).substr(2, 9);
+            chip.id = uniqueId;
+            newChip.dataset.source = uniqueId;
+
+            newChip.onclick = function() {
+                if(dz.classList.contains('success')) return;
+                dz.removeChild(this);
+                document.getElementById(this.dataset.source).classList.remove('used');
+                const index = buildState[dzId].indexOf(this.innerText);
+                if (index > -1) buildState[dzId].splice(index, 1);
+            };
+
+            dz.appendChild(newChip);
+            chip.classList.add('used');
+            buildState[dzId].push(chip.innerText);
+
+            if(buildState[dzId].length === targetArr.length) {
+                const cleanResult = buildState[dzId].join(',').replace('.', '');
+                const cleanTarget = targetArr.join(',').replace('.', '');
+                
+                if(cleanResult === cleanTarget) {
+                    dz.classList.add('success');
+                    Array.from(dz.children).forEach(c => {
+                        c.style.background = 'var(--correct)';
+                        c.style.borderColor = 'var(--correct)';
+                        c.style.color = '#000';
+                        c.onclick = null;
+                    });
+                    score++;
+                    document.getElementById('score-display').innerHTML = `<i class="fa-solid fa-star"></i> ${score}`;
+                    showFeedback();
+                    nextSlideDelay();
+                } else {
+                    dz.style.borderColor = 'var(--incorrect)';
+                    dz.style.animation = 'shake 0.4s';
+                    setTimeout(() => {
+                        dz.innerHTML = '';
+                        dz.style.borderColor = 'rgba(255,255,255,0.3)';
+                        dz.style.animation = '';
+                        document.getElementById(wbId).querySelectorAll('.word-chip').forEach(c => c.classList.remove('used'));
+                        buildState[dzId] = [];
+                    }, 1000);
+                }
+            }
+        }
+
+        window.sendText = (btn, text, isCorrect) => {
+            const optsCont = document.getElementById('phone-opts');
+            if(optsCont.classList.contains('locked')) return;
+
+            if(isCorrect) {
+                const msg = document.getElementById('sent-msg');
+                msg.innerText = text;
+                msg.style.display = 'block';
+                optsCont.classList.add('locked');
+                optsCont.style.opacity = '0.5';
+                
+                score++;
+                document.getElementById('score-display').innerHTML = `<i class="fa-solid fa-star"></i> ${score}`;
+                document.getElementById('final-score').innerText = `⭐ ${score}/15`;
+                showFeedback();
+                nextSlideDelay();
+            } else {
+                btn.classList.add('incorrect');
+                setTimeout(() => btn.classList.remove('incorrect'), 500);
+            }
+        }
+        
+        updateProgress();
+    </script>
+</body>
+</html>
